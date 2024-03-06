@@ -1,0 +1,20 @@
+target_sources(${PROJECT_NAME}
+    PRIVATE
+        Camera.h
+        Camera.cpp
+        Game.h
+        Game.cpp
+        IRenderer.h
+        main.cpp
+        Matrix2.h
+        Matrix2.inl
+        Map.h
+        Map.cpp
+        RayCaster.h
+        RayCaster.cpp
+        SDLRenderer.h
+        SDLRenderer.cpp
+        Texture.h
+        Vector2.h
+        Vector2.inl
+)
