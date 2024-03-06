@@ -15,7 +15,7 @@ public:
     Game();
     ~Game();
 
-    bool init();
+    bool init(std::string mapPath = "assets/map/map.txt");  // Let user select map with argument!
     int run();
 
 #ifdef __EMSCRIPTEN__

@@ -13,6 +13,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <optional>
 
 #ifdef __EMSCRIPTEN__
 extern "C" void emscriptenCallback(Game* game)
@@ -33,18 +35,18 @@ Game::~Game()
     SDL_Quit();
 }
 
-bool Game::init()
+bool Game::init(std::string mapPath)
 {
     bool success = renderer_->init(
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
-        "Raycaster Engine");
+        "RayCast Engine");
     if (!success)
     {
         return false;
     }
 
-    std::optional<Map> map = Map::create("assets/map/map.txt");
+    std::optional<Map> map = Map::create(mapPath);
     if (!map.has_value())
     {
         return false;

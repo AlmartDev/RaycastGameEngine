@@ -28,7 +28,7 @@ That's all. The dependencies are automatically downloaded by [Hunter](https://gi
 
 ```bash
 mkdir build
-cd build
+cd buildR
 cmake ..
 cmake --build . --config Release
 ```
