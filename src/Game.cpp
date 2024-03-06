@@ -38,8 +38,7 @@ bool Game::init()
     bool success = renderer_->init(
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
-        "Press M for map, cursors to move and turn and "
-        "WASD to move and strafe.");
+        "Raycaster Engine");
     if (!success)
     {
         return false;

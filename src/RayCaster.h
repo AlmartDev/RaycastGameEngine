@@ -41,6 +41,8 @@ private:
     void drawMapPlayer();
     void drawMapDebugLines(const Vector2<float>& mapPlayerPosition);
 
+    void drawUI();
+
     std::pair<Vector2<int>, Vector2<float>> calculateInitialStep(
         const Vector2<int>& mapSquarePosition,
         const Vector2<float>& rayDirection,
@@ -85,6 +87,7 @@ private:
     std::optional<Texture> topTextureNight_;
     std::optional<Texture> bottomTexture_;
     std::array<std::optional<Texture>, 4> wallTextures_;
+    std::optional<Texture> gunTexture_;
     std::vector<uint32_t> drawBuffer_;
     uint16_t screenWidth_, screenHeight_;
 

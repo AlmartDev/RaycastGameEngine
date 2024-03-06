@@ -24,6 +24,8 @@ bool RayCaster::init(IRenderer& renderer)
     wallTextures_[2] = renderer.createTexture("assets/textures/wall2.bmp");
     wallTextures_[3] = renderer.createTexture("assets/textures/wall3.bmp");
 
+    gunTexture_ = renderer.createTexture("assets/textures/gun.bmp");
+
     return topTexture_.has_value() && topTextureNight_.has_value() && bottomTexture_.has_value() &&
            wallTextures_[0].has_value() && wallTextures_[1].has_value() && wallTextures_[2].has_value() &&
            wallTextures_[3].has_value();
@@ -38,6 +40,9 @@ void RayCaster::drawEverything(IRenderer& renderer)
     {
         drawMap();
     }
+
+    // TODO: UI, text and gun
+    drawUI();
 
     renderer.drawBuffer(drawBuffer_.data());
 }
@@ -260,6 +265,35 @@ void RayCaster::drawMapDebugLines(const Vector2<float>& mapPlayerPosition)
             static_cast<uint16_t>(mapPlayerPosition.y + (static_cast<float>(i) * camera_.planeRightEdgeDirection().y)),
             static_cast<uint16_t>(mapPlayerPosition.x + (static_cast<float>(i) * camera_.planeRightEdgeDirection().x)),
             planeColor);
+    }
+}
+
+void RayCaster::drawUI()
+{
+    int gunWidth = gunTexture_->width;
+    int gunHeight = gunTexture_->height;
+    int gunX = (screenWidth_ - gunWidth) / 2;
+    int gunY = screenHeight_ - gunHeight + 10;
+
+    for (int y = screenHeight_ - screenHeight_ / 10; y < screenHeight_; ++y)
+    {
+        for (int x = 0; x < screenWidth_; ++x)
+        {
+            plotPixel(x, y, rgbToUint32(80, 80, 80));
+        }
+    }
+
+    // ex. If gun is pistol
+    for (int y = 0; y < gunHeight; ++y)
+    {
+        for (int x = 0; x < gunWidth; ++x)
+        {
+            if (gunTexture_->texels[y * gunTexture_->width + x] != 0)
+            {
+                plotPixel(gunX + x, gunY + y, gunTexture_->texels[y * gunTexture_->width + x]);
+            }
+            
+        }
     }
 }
 
