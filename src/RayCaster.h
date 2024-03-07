@@ -5,6 +5,7 @@
 #include "Texture.h"
 
 #include <array>
+#include <iostream>
 #include <optional>
 #include <vector>
 
@@ -19,6 +20,9 @@ public:
     void drawEverything(IRenderer& renderer);
     void toggleMapDraw();
     void toggleNightMode();
+
+    // only used for text renderer...
+    void plotPixel(const uint16_t x, const uint16_t y, const uint32_t pixel);
 
 private:
     enum class WallSide
@@ -78,12 +82,58 @@ private:
         const int drawStart,
         const int drawEnd);
 
-    void plotPixel(const uint16_t x, const uint16_t y, const uint32_t pixel);
     Texture* mapIndexToWallTexture(const size_t index);
 
     Camera& camera_;
     Map& map_;
-    std::optional<Texture> topTexture_;
+    std::optional<Texture> topTexture_; 
+
+    std::optional<Texture> alphabetTexture; // Think it as a pixel font 7x12
+    std::vector<int> calculateCharsIndex(const char* text);
+    void drawText(const char* text, int posx, int posy, bool transparent);
+
+    std::vector<std::pair<char, int>> charIndices = {   // sry for this!
+        {' ', 0},
+        {'A', 1},
+        {'B', 2},
+        {'C', 3},
+        {'D', 4},
+        {'E', 5},
+        {'F', 6},
+        {'G', 7},
+        {'H', 8},
+        {'I', 9},
+        {'J', 10},
+        {'K', 11},
+        {'L', 12},
+        {'M', 13},
+        {'N', 14},
+        {'Ñ', 15},
+        {'O', 16},
+        {'P', 17},
+        {'Q', 18},
+        {'R', 19},
+        {'S', 20},
+        {'T', 21},
+        {'U', 22},
+        {'V', 23},
+        {'W', 24},
+        {'X', 25},
+        {'Y', 26},
+        {'Z', 27},
+        {'0', 28},
+        {'1', 29},
+        {'2', 30},
+        {'3', 31},
+        {'4', 32},
+        {'5', 33},
+        {'6', 34},
+        {'7', 35},
+        {'8', 36},
+        {'9', 37},
+        {'!', 38}
+    };
+
     std::optional<Texture> topTextureNight_;
     std::optional<Texture> bottomTexture_;
     std::array<std::optional<Texture>, 4> wallTextures_;

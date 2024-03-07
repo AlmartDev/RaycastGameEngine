@@ -19,12 +19,16 @@ bool RayCaster::init(IRenderer& renderer)
     topTexture_ = renderer.createTexture("assets/textures/dusk_sky_texture.bmp");
     topTextureNight_ = renderer.createTexture("assets/textures/night_sky_texture.bmp");
     bottomTexture_ = renderer.createTexture("assets/textures/floor.bmp");
+
     wallTextures_[0] = renderer.createTexture("assets/textures/wall0.bmp");
     wallTextures_[1] = renderer.createTexture("assets/textures/wall1.bmp");
     wallTextures_[2] = renderer.createTexture("assets/textures/wall2.bmp");
     wallTextures_[3] = renderer.createTexture("assets/textures/wall3.bmp");
 
     gunTexture_ = renderer.createTexture("assets/textures/gun.bmp");
+
+    // text here, move later
+    alphabetTexture = renderer.createTexture("assets/text/alphabet.bmp");
 
     return topTexture_.has_value() && topTextureNight_.has_value() && bottomTexture_.has_value() &&
            wallTextures_[0].has_value() && wallTextures_[1].has_value() && wallTextures_[2].has_value() &&
@@ -36,13 +40,13 @@ void RayCaster::drawEverything(IRenderer& renderer)
     drawTop();
     drawBottom();
     drawWalls();
+
+    drawUI();
+
     if (overviewMapOn_)
     {
         drawMap();
     }
-
-    // TODO: UI, text and gun
-    drawUI();
 
     renderer.drawBuffer(drawBuffer_.data());
 }
@@ -268,6 +272,53 @@ void RayCaster::drawMapDebugLines(const Vector2<float>& mapPlayerPosition)
     }
 }
 
+// UI --------------------- TODO: Move this to a spearate class!
+
+std::vector<int> RayCaster::calculateCharsIndex(const char* text) {
+    std::vector<int> indices;
+    for (int i = 0; i < strlen(text); i++)
+    {
+        char c = text[i];
+        c = toupper(c);
+        for (int j = 0; j < charIndices.size(); j++)
+        {
+            if (c == charIndices[j].first)
+            {
+                int index = charIndices[j].second;
+                int x = index * 7;
+                indices.push_back(x);
+                break;
+            }
+        }
+    }
+
+    return indices;
+}
+
+void RayCaster::drawText(const char* text, int posx, int posy, bool transparent=false) {
+    std::vector<int> indices = calculateCharsIndex(text);
+
+    for (int i = 0; i < indices.size(); i++)
+    {
+        for (int y = 0; y < 12; y++)
+        {
+            for (int x = 0; x < 7; x++)
+            {
+                int texel = alphabetTexture->texels[(y) * alphabetTexture->width + (x + indices[i])];
+                // For some reason the white background texel is 16777215 ???
+                if (transparent && texel != 16777215)
+                {
+                    plotPixel(posx + x + i * 7, posy + y, 0);   // Make colour black when transparent
+                }
+                else if (!transparent)
+                {
+                    plotPixel(posx + x + i * 7, posy + y, texel);
+                }
+            }
+        }
+    }
+}
+
 void RayCaster::drawUI()
 {
     int gunWidth = gunTexture_->width;
@@ -275,15 +326,6 @@ void RayCaster::drawUI()
     int gunX = (screenWidth_ - gunWidth) / 2;
     int gunY = screenHeight_ - gunHeight + 10;
 
-    for (int y = screenHeight_ - screenHeight_ / 10; y < screenHeight_; ++y)
-    {
-        for (int x = 0; x < screenWidth_; ++x)
-        {
-            plotPixel(x, y, rgbToUint32(80, 80, 80));
-        }
-    }
-
-    // ex. If gun is pistol
     for (int y = 0; y < gunHeight; ++y)
     {
         for (int x = 0; x < gunWidth; ++x)
@@ -295,7 +337,21 @@ void RayCaster::drawUI()
             
         }
     }
+
+    int hp = 100;
+    int ammo = 35;
+
+    std::string hpText =   " HP:      " + std::to_string(hp)   + " ";
+    std::string ammoText = " AMMO:    " + std::to_string(ammo) + " ";
+
+    int hpTextWidth = hpText.length() * 7;
+    int ammoTextWidth = ammoText.length() * 7;
+
+    drawText(hpText.c_str(), screenWidth_/2 - hpTextWidth/2, screenHeight_-36);
+    drawText(ammoText.c_str(), screenWidth_/2 - ammoTextWidth/2, screenHeight_-48);
 }
+
+// UI --------------------- 
 
 std::pair<Vector2<int>, Vector2<float>> RayCaster::calculateInitialStep(
     const Vector2<int>& mapSquarePosition, const Vector2<float>& rayDirection, const Vector2<float>& rayStepDistance)
