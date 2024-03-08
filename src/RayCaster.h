@@ -96,6 +96,8 @@ private:
     std::vector<int> calculateCharsIndex(const char* text);
     void drawText(const char* text, int posx, int posy, bool transparent);
 
+    void drawImage(Texture& texture, int posx, int posy, bool transparent);
+
     int hp = 100;   // here for now
     int ammo = 35;  // here for now
 
@@ -107,6 +109,8 @@ private:
     std::vector<uint32_t> drawBuffer_;
     uint16_t screenWidth_, screenHeight_;
 
+    // UI textures
+    std::optional<Texture> logoTexture_;
     std::optional<Texture> gunTexture_;
     std::optional<Texture> gunFlareTexture_;
 

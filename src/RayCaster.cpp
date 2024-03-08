@@ -25,13 +25,15 @@ bool RayCaster::init(IRenderer& renderer)
     wallTextures_[2] = renderer.createTexture("assets/textures/wall2.bmp");
     wallTextures_[3] = renderer.createTexture("assets/textures/wall3.bmp");
 
+    // UI textures
+    logoTexture_ = renderer.createTexture("assets/textures/logo.bmp");
     gunTexture_ = renderer.createTexture("assets/textures/gun.bmp");
     gunFlareTexture_ = renderer.createTexture("assets/textures/gunFlare.bmp");
 
     alphabetTexture = renderer.createTexture("assets/text/alphabet.bmp");
 
+    // init the char indices
     charIndices.reserve(39);
-
     charIndices.emplace_back(' ', 0);
     for (char c = 'A'; c <= 'Z'; ++c) {
         charIndices.emplace_back(c, c - 'A' + 1);
@@ -71,6 +73,23 @@ void RayCaster::drawText(const char* text, int posx, int posy, bool transparent=
     }
 }
 
+void RayCaster::drawImage(Texture& texture, int posx, int posy, bool transparent=false) { // TODO: Move this to a spearate class! with all UI stuff
+    for (size_t y = 0; y < texture.height; ++y)
+    {
+        for (size_t x = 0; x < texture.width; ++x)
+        {
+            if (transparent && texture.texels[y * texture.width + x] != 0) // Makes black transparent
+            {
+                plotPixel(posx + x, posy + y, texture.texels[y * texture.width + x]);   
+            }
+            else if (!transparent)
+            {
+                plotPixel(posx + x, posy + y, texture.texels[y * texture.width + x]);
+            }
+        }
+    }
+}
+
 void RayCaster::drawEverything(IRenderer& renderer)
 {
     if (showGame) {
@@ -86,9 +105,12 @@ void RayCaster::drawEverything(IRenderer& renderer)
         }
         
     } else {
+        // logo!
+        drawImage(*logoTexture_, screenWidth_ / 2 - logoTexture_->width / 2, screenHeight_ / 2 - logoTexture_->height / 2);
+
         char title[] = " press G to start the game! ";
         int titleX = screenWidth_ / 2 - strlen(title) * 7 / 2;
-        int titleY = screenHeight_ / 2 - 12;
+        int titleY =  screenHeight_ - screenHeight_ / 6;
         drawText(title, titleX, titleY);
 
         // tutorial
@@ -96,7 +118,7 @@ void RayCaster::drawEverything(IRenderer& renderer)
         char tutorial2[] = " Press SPACE to shoot ";
 
         int tutoX = screenWidth_ / 2 - strlen(tutorial) * 7 / 2;
-        int tutoY = screenHeight_ - screenHeight_ / 7;
+        int tutoY = titleY + 50;
 
         int tuto2X = screenWidth_ / 2 - strlen(tutorial2) * 7 / 2;
         int tuto2Y = tutoY + 16;
@@ -125,7 +147,7 @@ constexpr uint32_t RayCaster::rgbToUint32(const uint8_t r, const uint8_t g, cons
 
 uint32_t RayCaster::shadeTexelByDistance(const uint32_t texelToShade, const float distance)
 {
-    static const float shadeAmount = 0.5f;
+    static const float shadeAmount = 0.6f; // change to .3
     const float shadeFactor = 1.0f - std::min(1.0f, distance * shadeAmount);
 
     uint8_t red = (texelToShade >> 16) & 0xff;

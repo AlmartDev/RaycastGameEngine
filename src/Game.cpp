@@ -64,6 +64,12 @@ bool Game::init(std::string mapPath)
     return true;
 }
 
+void Game::loadMap(std::string mapPath)
+{
+    std::optional<Map> map = Map::create(mapPath);
+    map_ = map.value();
+}
+
 int Game::run()
 {
     running_ = true;
@@ -130,6 +136,20 @@ void Game::event()
         {
             case SDL_QUIT:
                 running_ = false;
+                break;
+            case SDL_KEYUP:
+                switch (e.key.keysym.sym)
+                {
+                    case SDLK_1:    // testing
+                        loadMap("assets/map/map.txt");
+                        break;
+                    case SDLK_2:
+                        loadMap("assets/map/map1.txt");
+                        break;
+                    case SDLK_3:
+                        loadMap("assets/map/map2.txt");
+                        break;
+                }
                 break;
             case SDL_KEYDOWN:
                 switch (e.key.keysym.sym)

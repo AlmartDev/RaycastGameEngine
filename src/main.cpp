@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     if (input.cmdOptionExists("-s") || input.cmdOptionExists("--skip-intro"))
         game.skipIntro();
     if (input.cmdOptionExists("-m") || input.cmdOptionExists("--map"))
-    {
+    { 
         mapPath = input.getCmdOption("-m");
         if (mapPath.empty())
         {
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
                 std::cerr << "Invalid map path" << std::endl;
                 return EXIT_FAILURE;
             }
-        }
+        } 
     }
     
     std::cout << "Map: " << mapPath << std::endl;

@@ -18,6 +18,8 @@ public:
     bool init(std::string mapPath);  // Let user select map with argument!
     int run();
 
+    void loadMap(std::string mapPath);
+
     void skipIntro() { raycaster_.showGame = true; }
 
 #ifdef __EMSCRIPTEN__
@@ -48,7 +50,7 @@ private:
 
     static constexpr Vector2<float> INITIAL_POSITION = {4.5f, 4.5f};
     static constexpr Vector2<float> INITIAL_DIRECTION = {1.f, 0.f};
-    static constexpr float INITIAL_FIELD_OF_VIEW = 60.f;
+    static constexpr float INITIAL_FIELD_OF_VIEW = 60.f;    // change to 100.f
 
     Camera camera_;
     RayCaster raycaster_;
