@@ -55,6 +55,9 @@ emcmake cmake \
 emcmake cmake --build . --config Release
 ```
 
+## Useful information
+- Minimum map size is 15x15
+
 ## References:
 
 - http://permadi.com/1996/05/ray-casting-tutorial-table-of-contents

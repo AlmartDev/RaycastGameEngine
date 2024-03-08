@@ -15,8 +15,10 @@ public:
     Game();
     ~Game();
 
-    bool init(std::string mapPath = "assets/map/map.txt");  // Let user select map with argument!
+    bool init(std::string mapPath);  // Let user select map with argument!
     int run();
+
+    void skipIntro() { raycaster_.showGame = true; }
 
 #ifdef __EMSCRIPTEN__
     void runEmscriptenIteration();
@@ -33,6 +35,8 @@ private:
         bool strafeLeft = false;
         bool strafeRight = false;
         bool running = false;
+
+        bool shoot = false;
     };
 
     static constexpr uint16_t WINDOW_WIDTH = 1024;

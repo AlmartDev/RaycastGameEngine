@@ -121,6 +121,8 @@ void Game::event()
     eventState_.strafeRight = keystate[SDL_SCANCODE_D];
     eventState_.running = keystate[SDL_SCANCODE_LSHIFT];
 
+    eventState_.shoot = keystate[SDL_SCANCODE_SPACE];
+
     SDL_Event e;
     while (SDL_PollEvent(&e))
     {
@@ -129,10 +131,12 @@ void Game::event()
             case SDL_QUIT:
                 running_ = false;
                 break;
-
             case SDL_KEYDOWN:
                 switch (e.key.keysym.sym)
                 {
+                    case SDLK_g:
+                        raycaster_.showGame = true;
+                        break;
                     case SDLK_ESCAPE:
                         running_ = false;
                         break;
@@ -175,6 +179,11 @@ void Game::update()
     if (eventState_.strafeRight)
     {
         camera_.strafe(Camera::DIRECTION_RIGHT);
+    }
+
+    // New stuff!
+    if (eventState_.shoot) {
+        raycaster_.shoot();
     }
 }
 

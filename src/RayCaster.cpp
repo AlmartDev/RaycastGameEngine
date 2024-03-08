@@ -26,26 +26,83 @@ bool RayCaster::init(IRenderer& renderer)
     wallTextures_[3] = renderer.createTexture("assets/textures/wall3.bmp");
 
     gunTexture_ = renderer.createTexture("assets/textures/gun.bmp");
+    gunFlareTexture_ = renderer.createTexture("assets/textures/gunFlare.bmp");
 
-    // text here, move later
     alphabetTexture = renderer.createTexture("assets/text/alphabet.bmp");
+
+    charIndices.reserve(39);
+
+    charIndices.emplace_back(' ', 0);
+    for (char c = 'A'; c <= 'Z'; ++c) {
+        charIndices.emplace_back(c, c - 'A' + 1);
+    }
+
+    for (char c = '0'; c <= '9'; ++c) {
+        charIndices.emplace_back(c, c - '0' + 27);
+    }   
+    charIndices.emplace_back('!', 37);
 
     return topTexture_.has_value() && topTextureNight_.has_value() && bottomTexture_.has_value() &&
            wallTextures_[0].has_value() && wallTextures_[1].has_value() && wallTextures_[2].has_value() &&
            wallTextures_[3].has_value();
 }
 
+void RayCaster::drawText(const char* text, int posx, int posy, bool transparent=false) { // TODO: Move this to a spearate class! with all UI stuff
+    std::vector<int> indices = calculateCharsIndex(text);   
+
+    for (size_t i = 0; i < indices.size(); i++)
+    {
+        for (int y = 0; y < 12; y++)
+        {
+            for (int x = 0; x < 7; x++)
+            {
+                int texel = alphabetTexture->texels[(y) * alphabetTexture->width + (x + indices[i])];
+                // For some reason the white background texel is 16777215 ???
+                if (transparent && texel != 16777215)
+                {
+                    plotPixel(posx + x + i * 7, posy + y, 0);   // Make colour black when transparent
+                }
+                else if (!transparent)
+                {
+                    plotPixel(posx + x + i * 7, posy + y, texel);
+                }
+            }
+        }
+    }
+}
+
 void RayCaster::drawEverything(IRenderer& renderer)
 {
-    drawTop();
-    drawBottom();
-    drawWalls();
+    if (showGame) {
+        drawTop();
+        drawBottom();
+        drawWalls();
 
-    drawUI();
+        drawUI();
 
-    if (overviewMapOn_)
-    {
-        drawMap();
+        if (overviewMapOn_)
+        {
+            drawMap();
+        }
+        
+    } else {
+        char title[] = " press G to start the game! ";
+        int titleX = screenWidth_ / 2 - strlen(title) * 7 / 2;
+        int titleY = screenHeight_ / 2 - 12;
+        drawText(title, titleX, titleY);
+
+        // tutorial
+        char tutorial[] = " WASD to move and arrows to look around ";
+        char tutorial2[] = " Press SPACE to shoot ";
+
+        int tutoX = screenWidth_ / 2 - strlen(tutorial) * 7 / 2;
+        int tutoY = screenHeight_ - screenHeight_ / 7;
+
+        int tuto2X = screenWidth_ / 2 - strlen(tutorial2) * 7 / 2;
+        int tuto2Y = tutoY + 16;
+
+        drawText(tutorial, tutoX, tutoY);
+        drawText(tutorial2, tuto2X, tuto2Y);
     }
 
     renderer.drawBuffer(drawBuffer_.data());
@@ -68,7 +125,7 @@ constexpr uint32_t RayCaster::rgbToUint32(const uint8_t r, const uint8_t g, cons
 
 uint32_t RayCaster::shadeTexelByDistance(const uint32_t texelToShade, const float distance)
 {
-    static const float shadeAmount = 0.4f;
+    static const float shadeAmount = 0.5f;
     const float shadeFactor = 1.0f - std::min(1.0f, distance * shadeAmount);
 
     uint8_t red = (texelToShade >> 16) & 0xff;
@@ -274,13 +331,13 @@ void RayCaster::drawMapDebugLines(const Vector2<float>& mapPlayerPosition)
 
 // UI --------------------- TODO: Move this to a spearate class!
 
-std::vector<int> RayCaster::calculateCharsIndex(const char* text) {
+std::vector<int> RayCaster::calculateCharsIndex(const char* text) { // Calculate the index of the character in the alphabet texture
     std::vector<int> indices;
-    for (int i = 0; i < strlen(text); i++)
+    for (size_t i = 0; i < strlen(text); i++)
     {
         char c = text[i];
         c = toupper(c);
-        for (int j = 0; j < charIndices.size(); j++)
+        for (size_t j = 0; j < charIndices.size(); j++)
         {
             if (c == charIndices[j].first)
             {
@@ -295,30 +352,6 @@ std::vector<int> RayCaster::calculateCharsIndex(const char* text) {
     return indices;
 }
 
-void RayCaster::drawText(const char* text, int posx, int posy, bool transparent=false) {
-    std::vector<int> indices = calculateCharsIndex(text);
-
-    for (int i = 0; i < indices.size(); i++)
-    {
-        for (int y = 0; y < 12; y++)
-        {
-            for (int x = 0; x < 7; x++)
-            {
-                int texel = alphabetTexture->texels[(y) * alphabetTexture->width + (x + indices[i])];
-                // For some reason the white background texel is 16777215 ???
-                if (transparent && texel != 16777215)
-                {
-                    plotPixel(posx + x + i * 7, posy + y, 0);   // Make colour black when transparent
-                }
-                else if (!transparent)
-                {
-                    plotPixel(posx + x + i * 7, posy + y, texel);
-                }
-            }
-        }
-    }
-}
-
 void RayCaster::drawUI()
 {
     int gunWidth = gunTexture_->width;
@@ -326,6 +359,35 @@ void RayCaster::drawUI()
     int gunX = (screenWidth_ - gunWidth) / 2;
     int gunY = screenHeight_ - gunHeight + 10;
 
+    if (_shoot){
+        int flareWidth = gunFlareTexture_->width;
+        int flareHeight = gunFlareTexture_->height;
+        int flareX = (screenWidth_ - flareWidth) / 2 - 18;  // This is bad if we want to change the resolution
+        int flareY = screenHeight_ - (screenHeight_ - flareHeight) / 3 - 16;
+
+        for (int y = 0; y < flareHeight; ++y)
+        {
+            for (int x = 0; x < flareWidth; ++x)
+            {
+                if (gunFlareTexture_->texels[y * gunFlareTexture_->width + x] != 0)
+                {
+                    plotPixel(flareX + x, flareY + y, gunFlareTexture_->texels[y * gunFlareTexture_->width + x]);
+                }
+            }
+        }    
+
+        gunY += 10; // Super basic animation
+
+        _shootTime++;
+        if (_shootTime <= 1) {
+            ammo--;
+        }
+        if (_shootTime > 50) {
+            _shoot = false;
+            _shootTime = 0;
+        }   
+    }
+    
     for (int y = 0; y < gunHeight; ++y)
     {
         for (int x = 0; x < gunWidth; ++x)
@@ -337,9 +399,6 @@ void RayCaster::drawUI()
             
         }
     }
-
-    int hp = 100;
-    int ammo = 35;
 
     std::string hpText =   " HP:      " + std::to_string(hp)   + " ";
     std::string ammoText = " AMMO:    " + std::to_string(ammo) + " ";
