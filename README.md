@@ -1,14 +1,9 @@
 # Raycaster engine
 
-![alt tag](doc/img/demo.gif)
+> [!WARNING]
+> Forked from Bálint Kiss (@balintkissdev) at [this repo](https://github.com/balintkissdev/raycaster-engine)!
 
-[Live demo](https://balintkissdev.github.io/raycaster-engine) | [Windows 64-bit download](https://github.com/balintkissdev/raycaster-engine/releases/download/0.0.5/Raycaster-0.0.5-win64.zip) | [Linux 64-bit download](https://github.com/balintkissdev/raycaster-engine/releases/download/0.0.5/Raycaster-0.0.5-linux-x86_64.AppImage)
-
-My take on making a raycasting pseudo-3D engine in C++, also with my own tiny template linear algebra types. One of the goals was to make raycasting computation equations more explicit and readable. Made first back in 2016 and adding code since to it.
-
-![alt tag](doc/img/demo2.png)
-
-![alt tag](doc/img/demo_night.png)
+Basically a remake of doom that can run anywhere were a C++ 17 compiler is able to work, even web browser!
 
 ## Features
 
@@ -16,6 +11,7 @@ My take on making a raycasting pseudo-3D engine in C++, also with my own tiny te
 - `WASD` to move and strafe
 - `M` to toggle mini-map
 - `N` to toggle "Night Mode" and display darkness and lighting effect
+- `SPACE` to shoot
 
 ## Requirements
 
@@ -58,15 +54,12 @@ emcmake cmake --build . --config Release
 ## Useful information
 - Minimum map size is 15x15
 
-## References:
-
-- http://permadi.com/1996/05/ray-casting-tutorial-table-of-contents
-- http://lodev.org/cgtutor/raycasting.html
-- http://www.instructables.com/id/Making-a-Basic-3D-Engine-in-Java
-- [Code-It-Yourself! First Person Shooter (Quick and Simple C++)](https://www.youtube.com/watch?v=xW8skO7MFYw) - by OneLoneCoder (javidx9)
-  - [Upgraded! First Person Shooter at Command Prompt (C++)](https://www.youtube.com/watch?v=HEb2akswCcw)
-  - [Super Fast Ray Casting in Tiled Worlds using DDA](https://www.youtube.com/watch?v=NbSee-XM7WA)
-  - [Introducing RayCastWorld](https://www.youtube.com/watch?v=Vij_obgv9h4)
-- Free sky texture is from http://www.texturex.com
-- Free night sky texture is from https://opengameart.org/content/night-sky-stars-and-galaxies
-- Free wall textures are from https://opengameart.org/content/wall-grass-rock-stone-wood-and-dirt-480
+## TODO List
+- [ ] Move UI functions from RayCaster class to a separate UI class
+- [ ] Sound Engine
+- [ ] Basic map editor (selecting textures, powerups, enemies and map layout)
+- [ ] Gamplay
+  - [ ] Weapon selector
+  - [ ] Powerups
+  - [ ] Enemies
+- [ ] Any fun stuff you can think of!
