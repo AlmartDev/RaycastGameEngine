@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstring>
 #include <iostream>
+#include <filesystem>
 
 RayCaster::RayCaster(Camera& camera, Map& map) : camera_(camera), map_(map) {}
 
@@ -20,10 +21,15 @@ bool RayCaster::init(IRenderer& renderer)
     topTextureNight_ = renderer.createTexture("assets/textures/night_sky_texture.bmp");
     bottomTexture_ = renderer.createTexture("assets/textures/floor.bmp");
 
-    wallTextures_[0] = renderer.createTexture("assets/textures/wall0.bmp");
-    wallTextures_[1] = renderer.createTexture("assets/textures/wall1.bmp");
-    wallTextures_[2] = renderer.createTexture("assets/textures/wall2.bmp");
-    wallTextures_[3] = renderer.createTexture("assets/textures/wall3.bmp");
+    const std::string directoryPath = "assets/textures/walls";
+
+    for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
+        if (entry.path().extension() == ".bmp") {
+            std::optional<Texture> texture = renderer.createTexture(entry.path().string());
+            if (texture.has_value()) 
+                wallTextures_.push_back(texture);
+        }
+    }
 
     // UI textures
     logoTexture_ = renderer.createTexture("assets/textures/logo.bmp");
@@ -44,12 +50,10 @@ bool RayCaster::init(IRenderer& renderer)
     }   
     charIndices.emplace_back('!', 37);
 
-    return topTexture_.has_value() && topTextureNight_.has_value() && bottomTexture_.has_value() &&
-           wallTextures_[0].has_value() && wallTextures_[1].has_value() && wallTextures_[2].has_value() &&
-           wallTextures_[3].has_value();
+    return topTexture_.has_value() && topTextureNight_.has_value() && bottomTexture_.has_value();
 }
 
-void RayCaster::drawText(const char* text, int posx, int posy, bool transparent=false) { // TODO: Move this to a spearate class! with all UI stuff
+void RayCaster::drawText(const char* text, int posx, int posy, bool transparent) { // TODO: Move this to a spearate class! with all UI stuff
     std::vector<int> indices = calculateCharsIndex(text);   
 
     for (size_t i = 0; i < indices.size(); i++)
@@ -73,7 +77,7 @@ void RayCaster::drawText(const char* text, int posx, int posy, bool transparent=
     }
 }
 
-void RayCaster::drawImage(Texture& texture, int posx, int posy, bool transparent=false) { // TODO: Move this to a spearate class! with all UI stuff
+void RayCaster::drawImage(Texture& texture, int posx, int posy, bool transparent) { // TODO: Move this to a spearate class! with all UI stuff
     for (size_t y = 0; y < texture.height; ++y)
     {
         for (size_t x = 0; x < texture.width; ++x)
@@ -86,6 +90,16 @@ void RayCaster::drawImage(Texture& texture, int posx, int posy, bool transparent
             {
                 plotPixel(posx + x, posy + y, texture.texels[y * texture.width + x]);
             }
+        }
+    }
+}
+
+void RayCaster::drawColor(int color, int startx, int endx, int starty, int endy) { // TODO: Move this to a spearate class! with all UI stuff
+    for (int y = starty; y < endy; ++y)
+    {
+        for (int x = startx; x < endx; ++x)
+        {
+            plotPixel(x, y, color);
         }
     }
 }
@@ -105,8 +119,11 @@ void RayCaster::drawEverything(IRenderer& renderer)
         }
         
     } else {
+        // background
+        drawColor(rgbToUint32(224,187, 228), 0, screenWidth_, 0, screenHeight_);
+
         // logo!
-        drawImage(*logoTexture_, screenWidth_ / 2 - logoTexture_->width / 2, screenHeight_ / 2 - logoTexture_->height / 2);
+        drawImage(*logoTexture_, screenWidth_ / 2 - logoTexture_->width / 2, screenHeight_ / 2 - logoTexture_->height / 2, true);
 
         char title[] = " press G to start the game! ";
         int titleX = screenWidth_ / 2 - strlen(title) * 7 / 2;

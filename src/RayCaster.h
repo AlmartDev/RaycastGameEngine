@@ -6,8 +6,8 @@
 
 #include <array>
 #include <iostream>
-#include <optional>
 #include <vector>
+#include <optional>
 
 class IRenderer;
 
@@ -92,11 +92,12 @@ private:
     Map& map_;
     std::optional<Texture> topTexture_; 
 
-    std::optional<Texture> alphabetTexture; // Think it as a pixel font 7x12
+    std::optional<Texture> alphabetTexture; // Think of it as a pixel font 7x12
     std::vector<int> calculateCharsIndex(const char* text);
-    void drawText(const char* text, int posx, int posy, bool transparent);
 
-    void drawImage(Texture& texture, int posx, int posy, bool transparent);
+    void drawText(const char* text, int posx, int posy, bool transparent=false);
+    void drawImage(Texture& texture, int posx, int posy, bool transparent=false);
+    void drawColor(int color, int startx, int endx, int starty, int endy);
 
     int hp = 100;   // here for now
     int ammo = 35;  // here for now
@@ -105,7 +106,9 @@ private:
 
     std::optional<Texture> topTextureNight_;
     std::optional<Texture> bottomTexture_;
-    std::array<std::optional<Texture>, 4> wallTextures_;
+
+    std::vector<std::optional<Texture>> wallTextures_;
+
     std::vector<uint32_t> drawBuffer_;
     uint16_t screenWidth_, screenHeight_;
 
@@ -120,4 +123,3 @@ private:
     float planeLeftDistance_;
     float planeRightDistance_;
 };
-
