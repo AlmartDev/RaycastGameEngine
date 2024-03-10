@@ -20,8 +20,10 @@ public:
 
     bool init(IRenderer& renderer);
     void drawEverything(IRenderer& renderer);
+
     void toggleMapDraw();
     void toggleNightMode();
+    void toggleInverseColor();
 
     void shoot() { _shoot = true; }
 private:
@@ -91,6 +93,7 @@ private:
     Camera& camera_;
     Map& map_;
     std::optional<Texture> topTexture_; 
+    std::optional<Texture> bottomTexture_;
 
     std::optional<Texture> alphabetTexture; // Think of it as a pixel font 7x12
     std::vector<int> calculateCharsIndex(const char* text);
@@ -104,8 +107,6 @@ private:
 
     std::vector<std::pair<char, int>> charIndices;
 
-    std::optional<Texture> topTextureNight_;
-    std::optional<Texture> bottomTexture_;
 
     std::vector<std::optional<Texture>> wallTextures_;
 
@@ -119,6 +120,7 @@ private:
 
     bool overviewMapOn_{false};
     bool drawDarkness_{false};
+    bool inverseColor_{false};
     float cameraLineDistance_;
     float planeLeftDistance_;
     float planeRightDistance_;

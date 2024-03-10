@@ -17,8 +17,8 @@ bool RayCaster::init(IRenderer& renderer)
     screenHeight_ = renderer.screenHeight();
     drawBuffer_.resize(screenWidth_ * screenHeight_);
 
-    topTexture_ = renderer.createTexture("assets/textures/dusk_sky_texture.bmp");
-    topTextureNight_ = renderer.createTexture("assets/textures/night_sky_texture.bmp");
+    topTexture_ = renderer.createTexture("assets/textures/cieling.bmp");
+    //topTextureNight_ = renderer.createTexture("assets/textures/night_sky_texture.bmp");
     bottomTexture_ = renderer.createTexture("assets/textures/floor.bmp");
 
     const std::string directoryPath = "assets/textures/walls";
@@ -50,7 +50,7 @@ bool RayCaster::init(IRenderer& renderer)
     }   
     charIndices.emplace_back('!', 37);
 
-    return topTexture_.has_value() && topTextureNight_.has_value() && bottomTexture_.has_value();
+    return topTexture_.has_value() && bottomTexture_.has_value();
 }
 
 void RayCaster::drawText(const char* text, int posx, int posy, bool transparent) { // TODO: Move this to a spearate class! with all UI stuff
@@ -157,6 +157,11 @@ void RayCaster::toggleNightMode()
     drawDarkness_ = !drawDarkness_;
 }
 
+void RayCaster::toggleInverseColor()
+{
+    inverseColor_ = !inverseColor_;
+}
+
 constexpr uint32_t RayCaster::rgbToUint32(const uint8_t r, const uint8_t g, const uint8_t b)
 {
     return (255 << 24) + (r << 16) + (g << 8) + b;
@@ -178,15 +183,58 @@ uint32_t RayCaster::shadeTexelByDistance(const uint32_t texelToShade, const floa
     return rgbToUint32(red, green, blue);
 }
 
-void RayCaster::drawTop()
+/*void RayCaster::drawTop()
 {
     Texture* textureToDraw = &*topTexture_;
     if (drawDarkness_)
     {
         textureToDraw = &*topTextureNight_;
     }
-    // FIXME: Use full sky texture, not just half. It bugs out if walls are too far.
+    // FIXME: Use full sky texture, not just half. It bugs out if walls are too far.    SOLVED NOW?
     memcpy(drawBuffer_.data(), textureToDraw->texels.data(), textureToDraw->pitch * textureToDraw->height);
+}
+*/
+
+void RayCaster::drawTop()
+{
+    for (size_t y = 0; y < screenHeight_ / 2; ++y)
+    {
+        const Vector2<float> leftmostRayDirection = camera_.planeLeftEdgeDirection();
+        const Vector2<float> rightmostRayDirection = camera_.planeRightEdgeDirection();
+
+        const size_t screenCenterDistance = screenHeight_ / 2 - y;
+        const float cameraVerticalPosition = 0.5f * static_cast<float>(screenHeight_);
+        const float cameraToRowDistance = cameraVerticalPosition / static_cast<float>(screenCenterDistance);
+
+        const Vector2<float> ceilingStep =
+            cameraToRowDistance * (rightmostRayDirection - leftmostRayDirection) / static_cast<float>(screenWidth_);
+
+        Vector2<float> ceiling = camera_.position() + (leftmostRayDirection * cameraToRowDistance);
+
+        for (size_t x = 0; x < screenWidth_; ++x)
+        {
+            const Vector2<size_t> cell = {static_cast<size_t>(ceiling.x), static_cast<size_t>(ceiling.y)};
+
+            const Vector2<size_t> texCoord = {
+                static_cast<size_t>(
+                    static_cast<float>(topTexture_->width) * (ceiling.x - static_cast<float>(cell.x))) &
+                    (topTexture_->width - 1),
+                static_cast<size_t>(
+                    static_cast<float>(topTexture_->height) * (ceiling.y - static_cast<float>(cell.y))) &
+                    (topTexture_->height - 1)};
+
+            ceiling += ceilingStep;
+
+            uint32_t texel = topTexture_->texels[topTexture_->width * texCoord.y + texCoord.x];
+
+            if (drawDarkness_)
+            {
+                texel = shadeTexelByDistance(texel, cameraToRowDistance);
+            }
+
+            plotPixel(x, y, texel);
+        }
+    }
 }
 
 void RayCaster::drawBottom()
@@ -612,7 +660,10 @@ void RayCaster::drawTexturedColumn(
 
 void RayCaster::plotPixel(const uint16_t x, const uint16_t y, const uint32_t pixel)
 {
-    drawBuffer_[y * screenWidth_ + x] = pixel;
+    if (inverseColor_)
+        drawBuffer_[y * screenWidth_ + x] = ~pixel;
+    else
+        drawBuffer_[y * screenWidth_ + x] = pixel;
 }
 
 Texture* RayCaster::mapIndexToWallTexture(const size_t index)

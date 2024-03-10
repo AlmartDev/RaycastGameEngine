@@ -155,7 +155,7 @@ void Game::event()
                 switch (e.key.keysym.sym)
                 {
                     case SDLK_g:
-                        raycaster_.showGame = true;
+                        skipIntro();    
                         break;
                     case SDLK_ESCAPE:
                         running_ = false;
@@ -166,6 +166,9 @@ void Game::event()
                         break;
                     case SDLK_n:
                         raycaster_.toggleNightMode();
+                        break;
+                    case SDLK_i:
+                        raycaster_.toggleInverseColor();
                         break;
                 }
         }

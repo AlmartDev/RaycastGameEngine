@@ -11,6 +11,7 @@ Basically a remake of doom that can run anywhere were a C++ 17 compiler is able 
 - `WASD` to move and strafe
 - `M` to toggle mini-map
 - `N` to toggle "Night Mode" and display darkness and lighting effect
+- `I` to toggle color invert
 - `SPACE` to shoot
 
 ## Requirements
